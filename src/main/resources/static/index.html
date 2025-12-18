@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>UPI Payment Simulator</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6fb;
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .box {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .box h3 {
+            margin-top: 0;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 6px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #4338ca;
+        }
+
+        .success {
+            color: green;
+            margin-top: 8px;
+        }
+
+        .error {
+            color: red;
+            margin-top: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background: #f0f0f0;
+        }
+
+        .row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .half {
+            flex: 1;
+        }
+
+        @media (max-width: 768px) {
+            .row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<h1>UPI Payment Simulator</h1>
+
+<div class="container">
+
+    <!-- REGISTER -->
+    <div class="box">
+        <h3>Register</h3>
+        <input id="r-name" placeholder="Full Name">
+        <input id="r-mobile" placeholder="Mobile">
+        <input id="r-email" placeholder="Email">
+        <input id="r-password" type="password" placeholder="Password">
+        <button onclick="register()">Register</button>
+        <p id="register-result"></p>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="box">
+        <h3>Login</h3>
+        <input id="mobile" placeholder="Mobile">
+        <input id="password" type="password" placeholder="Password">
+        <button onclick="login()">Login</button>
+        <p id="login-result"></p>
+    </div>
+
+    <div class="row">
+
+        <!-- CREATE UPI -->
+        <div class="box half">
+            <h3>Create UPI ID</h3>
+            <input id="upiId" placeholder="example@paytm">
+            <button onclick="createUpi()">Create UPI</button>
+            <p id="upi-result"></p>
+        </div>
+
+        <!-- SET PIN -->
+        <div class="box half">
+            <h3>Set UPI PIN</h3>
+            <input id="upiPinSet" type="password" placeholder="4 digit PIN">
+            <button onclick="setUpiPin()">Set PIN</button>
+            <p id="pin-result"></p>
+        </div>
+    </div>
+    <!-- ADD BALANCE -->
+    <div class="box">
+        <h3>Add Balance</h3>
+        <input id="addAmount" placeholder="Amount to add">
+        <button onclick="addBalance()">Add Money</button>
+        <p id="add-result"></p>
+    </div><!-- CHECK BALANCE -->
+    <div class="box">
+        <h3>Check Balance</h3>
+        <button onclick="checkBalance()">View Balance</button>
+        <p id="balance-result"></p>
+    </div>
+
+
+
+    <!-- SEND MONEY -->
+    <div class="box">
+        <h3>Send Money</h3>
+        <input id="receiver" placeholder="Receiver UPI ID">
+        <input id="amount" placeholder="Amount">
+        <input id="pin" type="password" placeholder="UPI PIN">
+        <button onclick="sendMoney()">Pay</button>
+        <p id="pay-result"></p>
+    </div>
+
+    <!-- TRANSACTION HISTORY -->
+    <div class="box">
+        <h3>Transaction History</h3>
+        <button onclick="loadTransactions()">Load Transactions</button>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Type</th>
+                <th>UPI ID</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Date</th>
+            </tr>
+            </thead>
+            <tbody id="tx-table"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    let jwt = "";
+
+    // REGISTER
+    function register() {
+        const res = document.getElementById("register-result");
+        res.className = "";
+
+        const name = document.getElementById("r-name").value;
+        const mobile = document.getElementById("r-mobile").value;
+        const email = document.getElementById("r-email").value;
+        const password = document.getElementById("r-password").value;
+
+        if (!name || !mobile || !email || !password) {
+            res.className = "error";
+            res.innerText = "All fields are required";
+            return;
+        }
+
+        fetch("/auth/register", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ name, mobile, email, password })
+        })
+            .then(r => r.text())
+            .then(msg => {
+                res.className = "success";
+                res.innerText = msg;
+            })
+            .catch(() => {
+                res.className = "error";
+                res.innerText = "Registration failed";
+            });
+    }
+
+    // LOGIN
+    function login() {
+        const res = document.getElementById("login-result");
+        res.className = "";
+
+        const mobile = document.getElementById("mobile").value;
+        const password = document.getElementById("password").value;
+
+        fetch("/auth/login", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ mobile, password })
+        })
+            .then(r => {
+                if (!r.ok) throw "";
+                return r.text();
+            })
+            .then(token => {
+                jwt = token;
+                res.className = "success";
+                res.innerText = "Login successful";
+            })
+            .catch(() => {
+                res.className = "error";
+                res.innerText = "Invalid credentials";
+            });
+    }
+
+    // CREATE UPI
+    function createUpi() {
+        fetch("/upi/create", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + jwt
+            },
+            body: JSON.stringify({
+                upiId: document.getElementById("upiId").value
+            })
+        })
+            .then(r => r.text())
+            .then(msg => document.getElementById("upi-result").innerText = msg);
+    }
+
+    // SET PIN
+    function setUpiPin() {
+        fetch("/upi/set-pin", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + jwt
+            },
+            body: JSON.stringify({
+                upiPin: document.getElementById("upiPinSet").value
+            })
+        })
+            .then(r => r.text())
+            .then(msg => document.getElementById("pin-result").innerText = msg);
+    }
+
+    // SEND MONEY
+    function sendMoney() {
+        const result = document.getElementById("pay-result");
+        result.innerText = "";
+
+        fetch("/upi/pay", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + jwt
+            },
+            body: JSON.stringify({
+                receiverUpiId: document.getElementById("receiver").value,
+                amount: document.getElementById("amount").value,
+                upiPin: document.getElementById("pin").value
+            })
+        })
+            .then(async res => {
+                const text = await res.text();
+
+                // 🔑 IMPORTANT: handle both string & JSON
+                try {
+                    const json = JSON.parse(text);
+
+                    // ApiError case
+                    if (json.message) {
+                        result.innerText = json.message;
+                    } else {
+                        result.innerText = JSON.stringify(json);
+                    }
+
+                } catch (e) {
+                    // Success string
+                    result.innerText = text;
+                }
+            })
+            .catch(() => {
+                result.innerText = "Payment failed";
+            });
+    }
+
+
+
+    // TRANSACTION HISTORY
+    function loadTransactions() {
+        fetch("/upi/transactions?page=0&size=10", {
+            headers: { "Authorization": "Bearer " + jwt }
+        })
+            .then(r => r.json())
+            .then(data => {
+                const table = document.getElementById("tx-table");
+                table.innerHTML = "";
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    table.innerHTML =
+                        "<tr><td colspan='5'>No transactions found</td></tr>";
+                    return;
+                }
+
+                data.forEach(tx => {
+                    table.innerHTML += `
+                    <tr>
+                        <td>${tx.type}</td>
+                        <td>${tx.upiId}</td>
+                        <td>${tx.amount}</td>
+                        <td>${tx.status}</td>
+                        <td>${tx.date}</td>
+                    </tr>`;
+                });
+            });
+    }function addBalance() {
+        const res = document.getElementById("add-result");
+        res.className = "";
+
+        fetch("/bank/add-balance", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + jwt
+            },
+            body: JSON.stringify({
+                amount: document.getElementById("addAmount").value
+            })
+        })
+            .then(async r => {
+                const text = await r.text();
+                if (!r.ok) {
+                    try {
+                        const json = JSON.parse(text);
+                        res.innerText = json.message;
+                    } catch {
+                        res.innerText = text;
+                    }
+                    res.className = "error";
+                    return;
+                }
+
+                res.innerText = text;
+                res.className = "success";
+            });
+    }function checkBalance() {
+        const res = document.getElementById("balance-result");
+        res.className = "";
+
+        fetch("/bank/balance", {
+            headers: {
+                "Authorization": "Bearer " + jwt
+            }
+        })
+            .then(async r => {
+                const text = await r.text();
+
+                if (!r.ok) {
+                    try {
+                        const json = JSON.parse(text);
+                        res.innerText = json.message;
+                    } catch {
+                        res.innerText = "Failed to fetch balance";
+                    }
+                    res.className = "error";
+                    return;
+                }
+
+                const json = JSON.parse(text);
+                res.innerText = "Current Balance: ₹ " + json.balance;
+                res.className = "success";
+            });
+    }
+
+
+</script>
+
+</body>
+</html>
