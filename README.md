@@ -9,7 +9,7 @@ using Spring Boot and JWT authentication.
 
 ---
 
-## 🚀 Features
+##  Features
 
 - User Registration & Login
 - JWT-based Authentication
@@ -23,7 +23,7 @@ using Spring Boot and JWT authentication.
 
 ---
 
-## 🧠 UPI Flow Implemented
+##  UPI Flow Implemented
 
 Register → Login → JWT Token
 ↓
@@ -34,7 +34,7 @@ Add Balance → Send Money → View Transactions
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 - Java 17+
 - Spring Boot
@@ -47,7 +47,7 @@ Add Balance → Send Money → View Transactions
 
 ---
 
-## ⚙️ How to Run the Project
+## How to Run the Project
 
 1. Clone the repository
    ```bash
@@ -62,21 +62,3 @@ mvn spring-boot:run
 Open browser
 
 http://localhost:8080
-
-🔐 Security
-
-Stateless JWT Authentication
-
-Passwords & UPI PINs are stored in encrypted form
-
-All payment APIs are secured
-
-👨‍💻 Author
-
-Anil Kumar
-Java Backend Developer (Fresher)
-
-📌 Purpose
-
-This project was built to understand and demonstrate how real UPI-based
-FinTech systems work internally and to prepare for backend Java interviews.
