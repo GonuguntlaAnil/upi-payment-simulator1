@@ -49,15 +49,7 @@ Add Balance → Send Money → View Transactions
 
 ## How to Run the Project
 
-1. Clone the repository
-   ```bash
-   git clone https://github.com/ga186/upi-payment-simulator.git
-Configure Oracle DB in application.properties
-
-Run the Spring Boot application
-
-mvn spring-boot:run
-
+https://upi-payment-simulator1.onrender.com/
 
 Open browser
 
