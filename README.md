@@ -26,9 +26,9 @@ using Spring Boot and JWT authentication.
 ##  UPI Flow Implemented
 
 Register → Login → JWT Token
-↓
+->
 Create UPI ID → Set UPI PIN
-↓
+->
 Add Balance → Send Money → View Transactions
 
 
